@@ -97,4 +97,4 @@ if __name__ == '__main__':
             check_and_rename(l)
             check_same_name(l, names)
 
-        # psd.save('out2.psd')
+        psd.save(file)
