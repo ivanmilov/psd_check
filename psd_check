@@ -13,7 +13,7 @@ log_reset = True
 
 
 def print_out_and_file(s):
-    print(s)
+    print('\t', s)
 
     global log_reset
     mode = 'a'
@@ -73,28 +73,23 @@ def print_file_name():
 
 
 if __name__ == '__main__':
-    for file in sys.argv[1:]:
-        filename = file
-        psd = PSDImage.open(file)
-        base = os.path.splitext(file)[0]
-        logfile = base + '.log'
-        log_reset = True
-        has_printed = False
+    path = sys.argv[1]
 
-        names = {}
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            if os.path.splitext(name)[1].lower() == '.psd':
 
-        # print(psd[0].name, psd[0][0].name)
-        # print(psd[1].name, psd[1][0].name)
+                filename = os.path.join(root, name)
+                psd = PSDImage.open(filename)
+                base = os.path.splitext(filename)[0]
+                logfile = base + '.log'
+                log_reset = True
+                has_printed = False
 
-        # psd[0][0].name = 'huy# ,p`esda'
+                names = {}
 
-        # print(psd[0].name, psd[0][0].name)
-        # print(psd[1].name, psd[1][0].name)
+                for l in psd.descendants():
+                    check_and_rename(l)
+                    check_same_name(l, names)
 
-        # psd.save('out.psd')
-        # break
-        for l in psd.descendants():
-            check_and_rename(l)
-            check_same_name(l, names)
-
-        psd.save(file)
+                psd.save(filename)
