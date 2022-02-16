@@ -1,3 +1,5 @@
+#!/usr/bin/python3
+
 from psd_tools import PSDImage
 import sys
 import os.path
