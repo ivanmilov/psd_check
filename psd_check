@@ -4,6 +4,7 @@ from psd_tools import PSDImage
 import sys
 import os.path
 import string
+import tempfile
 
 transtab = str.maketrans('', '', string.ascii_letters + string.digits + '_')
 filename = ''
@@ -81,8 +82,10 @@ if __name__ == '__main__':
 
                 filename = os.path.join(root, name)
                 psd = PSDImage.open(filename)
-                base = os.path.splitext(filename)[0]
-                logfile = base + '.log'
+                base = os.path.splitext(os.path.basename(filename))[0]
+
+                logfile = os.path.join(
+                    tempfile.gettempdir(), f'{base}.log')
                 log_reset = True
                 has_printed = False
 
