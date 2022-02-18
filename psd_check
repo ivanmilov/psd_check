@@ -14,9 +14,11 @@ log_reset = True
 
 
 def print_out_and_file(s):
+    global log_reset
+    global logfile
+
     print('\t', s)
 
-    global log_reset
     mode = 'a'
     if log_reset:
         mode = 'w'
@@ -73,29 +75,50 @@ def print_file_name():
         has_printed = True
 
 
+def check(filename):
+    global logfile
+    global log_reset, has_printed
+
+    if os.path.splitext(filename)[1].lower() == '.psd':
+        psd = PSDImage.open(filename)
+        base = os.path.splitext(os.path.basename(filename))[0]
+
+        logfile = os.path.join(
+            tempfile.gettempdir(), f'{base}.log')
+        log_reset = True
+        has_printed = False
+
+        names = {}
+
+        for l in psd.descendants():
+            check_and_rename(l)
+            check_same_name(l, names)
+
+        psd.save(filename)
+
+
+def check_bulk(path):
+    for root, dirs, files in os.walk(path):
+        for name in files:
+            filename = os.path.join(root, name)
+            check(name)
+
+
 if __name__ == '__main__':
     if len(sys.argv) == 1:
         path = '.'
     else:
         path = sys.argv[1]
 
-    for root, dirs, files in os.walk(path):
-        for name in files:
-            if os.path.splitext(name)[1].lower() == '.psd':
+    if not os.path.exists(path):
+        print(f'Err, wrong path [{path}]')
+        exit(1)
 
-                filename = os.path.join(root, name)
-                psd = PSDImage.open(filename)
-                base = os.path.splitext(os.path.basename(filename))[0]
+    if os.path.isdir(path):
+        check_bulk(path)
+        exit(0)
+    if os.path.isfile(path):
+        check(path)
+        exit(0)
 
-                logfile = os.path.join(
-                    tempfile.gettempdir(), f'{base}.log')
-                log_reset = True
-                has_printed = False
-
-                names = {}
-
-                for l in psd.descendants():
-                    check_and_rename(l)
-                    check_same_name(l, names)
-
-                psd.save(filename)
+    print(f'err, not a file [{path}]')
