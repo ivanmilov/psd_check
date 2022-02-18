@@ -9,5 +9,8 @@ setup(name='psd_check',
       url='https://github.com/ivanmilov/psd_check',
       scripts=[
           'psd_check'
-      ]
+      ],
+      install_requires=[
+          'psd_tools',
+      ],
       )
