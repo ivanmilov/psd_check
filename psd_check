@@ -6,6 +6,9 @@ import os.path
 import string
 import tempfile
 
+from tkinter import *
+from tkinterdnd2 import *
+
 transtab = str.maketrans('', '', string.ascii_letters + string.digits + '_')
 filename = ''
 logfile = ''
@@ -69,15 +72,15 @@ def get_path(layer):
 
 
 def print_file_name():
-    global has_printed
+    global has_printed, filename
     if not has_printed:
         print(filename, ':')
         has_printed = True
 
 
-def check(filename):
+def check():
     global logfile
-    global log_reset, has_printed
+    global log_reset, has_printed, filename
 
     if os.path.splitext(filename)[1].lower() == '.psd':
         psd = PSDImage.open(filename)
@@ -98,27 +101,50 @@ def check(filename):
 
 
 def check_bulk(path):
+    global filename
     for root, dirs, files in os.walk(path):
         for name in files:
             filename = os.path.join(root, name)
-            check(name)
+            check()
 
 
-if __name__ == '__main__':
-    if len(sys.argv) == 1:
-        path = '.'
-    else:
-        path = sys.argv[1]
+def init_gui():
+    ws = TkinterDnD.Tk()
+    ws.title('Psd check')
+    ws.geometry('300x200')
+    # ws.config(bg='#fcba03')
+
+    lframe = LabelFrame(ws,
+                        text='Drag folder there'
+                        # , bg='#fcba03'
+                        )
+    Label(
+        lframe,
+        # bg='#fcba03',
+        text='Drag and drop the folder \nwith psd files there.'
+    ).pack(fill=BOTH, expand=True)
+    lframe.pack(fill=BOTH, expand=True, padx=10, pady=10)
+
+    lframe.drop_target_register(DND_FILES)
+    lframe.dnd_bind('<<Drop>>', drop)
+
+    ws.mainloop()
+
+
+def drop(event):
+    global filename
+
+    path = os.path.normpath(event.data)
 
     if not os.path.exists(path):
         print(f'Err, wrong path [{path}]')
-        exit(1)
 
     if os.path.isdir(path):
         check_bulk(path)
-        exit(0)
     if os.path.isfile(path):
-        check(path)
-        exit(0)
+        filename = path
+        check()
 
-    print(f'err, not a file [{path}]')
+
+if __name__ == '__main__':
+    init_gui()

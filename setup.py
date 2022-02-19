@@ -12,5 +12,7 @@ setup(name='psd_check',
       ],
       install_requires=[
           'psd_tools',
+          'tkinter',
+          'tkinterdnd2'
       ],
       )
